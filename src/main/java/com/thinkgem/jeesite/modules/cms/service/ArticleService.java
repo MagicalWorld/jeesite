@@ -201,8 +201,8 @@ public class ArticleService extends BaseService {
 		// 全文检索
 		articleDao.search(page, query, queryFilter, sort);
 		// 关键字高亮
-		articleDao.keywordsHighlight(query, page.getList(), 30, "title");
-		articleDao.keywordsHighlight(query, page.getList(), 130, "description","articleData.content");
+		page.setList(articleDao.keywordsHighlight(query, page.getList(), 30, "title"));
+		page.setList(articleDao.keywordsHighlight(query, page.getList(), 130, "description","articleData.content"));
 		
 		return page;
 	}
