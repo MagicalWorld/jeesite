@@ -763,29 +763,63 @@ public class BaseDao<T> {
 	 * @param list 设置高亮的内容列表
 	 * @param subLength 截取长度
 	 * @param fields 字段名
+	 * 修改记录：
+	 * 20150121 问题：在高亮处理后，带有格式化的数据会持久化到数据库中
 	 */
 	public List<T> keywordsHighlight(BooleanQuery query, List<T> list, int subLength, String... fields){
 		Analyzer analyzer = new IKAnalyzer();
 		Formatter formatter = new SimpleHTMLFormatter("<span class=\"highlight\">", "</span>");   
 		Highlighter highlighter = new Highlighter(formatter, new QueryScorer(query)); 
 		highlighter.setTextFragmenter(new SimpleFragmenter(subLength)); 
+		// 高亮返回结果集
+		List<T> tmpList = new ArrayList<T>();
+		// 复制实体对象
+		T tmpT = null;
 		for(T entity : list){ 
+			tmpT = cloneEntity(entity);
 			try {
 				for (String field : fields){
-					String text = StringUtils.replaceHtml((String)Reflections.invokeGetter(entity, field));
+					String text = StringUtils.replaceHtml((String)Reflections.invokeGetter(tmpT, field));
 					String description = highlighter.getBestFragment(analyzer,field, text);
 					if(description!=null){
-						Reflections.invokeSetter(entity, fields[0], description);
+						Reflections.invokeSetter(tmpT, fields[0], description);
 						break;
 					}
-					Reflections.invokeSetter(entity, fields[0], StringUtils.abbr(text, subLength*2));
+					Reflections.invokeSetter(tmpT, fields[0], StringUtils.abbr(text, subLength*2));
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InvalidTokenOffsetsException e) {
 				e.printStackTrace();
 			} 
+			tmpList.add(tmpT);
 		}
-		return list;
+		// 处理后需要在调用本方法的地方将page中的list赋值为返回值
+		return tmpList;
+	}
+	
+	/**
+	 * 复制对象
+	 * @param obj
+	 */
+	@SuppressWarnings("unchecked")
+	private T cloneEntity(T obj) {
+		T retT = null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(obj);
+			oos.close();
+			
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			ObjectInputStream ois = new ObjectInputStream(bais);
+			retT = (T) ois.readObject();
+			ois.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return retT;
 	}
 }
