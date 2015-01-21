@@ -106,9 +106,9 @@ public class GuestbookService extends BaseService {
 		// 全文检索
 		guestbookDao.search(page, query, queryFilter, sort);
 		// 关键字高亮
-		guestbookDao.keywordsHighlight(query, page.getList(), 30, "name");
-		guestbookDao.keywordsHighlight(query, page.getList(), 1300, "content");
-		guestbookDao.keywordsHighlight(query, page.getList(), 1300, "reContent");
+		page.setList(page.setList(guestbookDao.keywordsHighlight(query, page.getList(), 30, "name"));
+		page.setList(guestbookDao.keywordsHighlight(query, page.getList(), 1300, "content"));
+		page.setList(guestbookDao.keywordsHighlight(query, page.getList(), 1300, "reContent"));
 		
 		return page;
 	}
