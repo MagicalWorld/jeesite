@@ -749,6 +749,8 @@ public class BaseDao<T> {
 				for (String field : fields){
 					QueryParser parser = new QueryParser(Version.LUCENE_36, field, analyzer);   
 					//query.add(parser.parse(q), Occur.SHOULD);
+					// 增加对特殊字符和关键字处理
+					query.add(parser.parse(QueryParser.escape(q.toLowerCase())), Occur.SHOULD);
 				}
 			}
 		} catch (ParseException e) {
