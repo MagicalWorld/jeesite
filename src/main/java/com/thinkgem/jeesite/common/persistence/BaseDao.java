@@ -748,7 +748,7 @@ public class BaseDao<T> {
 			if (StringUtils.isNotBlank(q)){
 				for (String field : fields){
 					QueryParser parser = new QueryParser(Version.LUCENE_36, field, analyzer);   
-					query.add(parser.parse(q), Occur.SHOULD);
+					//query.add(parser.parse(q), Occur.SHOULD);
 				}
 			}
 		} catch (ParseException e) {
